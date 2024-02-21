@@ -74,7 +74,7 @@ addRoute('POST', '/products', function (){
     $data = file_get_contents("php://input");
     $product = Product::Create($data);
 });
-addRoute('PATCH', '/products', function ($id){
+addRoute('PATCH', '/products/(\d+)', function ($id){
     $product = Product::Find_by_id($id);
     $data = file_get_contents("php://input");
     $product->edit($data);
