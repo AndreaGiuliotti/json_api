@@ -2,6 +2,17 @@
 require_once "connection/Database.php";
 require_once "Product.php";
 
+header("Content-type: application/json; charset=UTF-8");
+$uri = explode("/", $_SERVER["REQUEST_URI"]);
+
+if ($uri[1] != "products") {
+    http_response_code(404);
+    exit;
+}
+
+$id = $parts[2] ?? null;
+
+
 // Definisci un array associativo per mappare le route
 $routes = [
     'GET' => [],
@@ -55,17 +66,22 @@ function handleRequest() {
 // Aggiungi le tue route qui
 addRoute('GET', '/products/(\d+)', function($id) {
     $product = Product::Find_by_id($id);
-
 });
 addRoute('GET', '/products', function() {
     $products = Product::FetchAll();
 });
-addRoute('POST', '/products', function ($_POST){
-    $product = Product::Create($_POST);
+addRoute('POST', '/products', function (){
+    $data = file_get_contents("php://input");
+    $product = Product::Create($data);
 });
-addRoute('POST', '/products', function ($id){
+addRoute('PATCH', '/products', function ($id){
     $product = Product::Find_by_id($id);
     $data = file_get_contents("php://input");
+    $product->edit($data);
+});
+addRoute('DELETE', '/products/(\d+)', function($id) {
+    $product = Product::Find_by_id($id);
+    $product->delete($id);
 });
 
 handleRequest();
