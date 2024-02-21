@@ -1,10 +1,12 @@
 <?php
+require_once "connection/Database.php";
+require_once "Product.php";
 
 // Definisci un array associativo per mappare le route
 $routes = [
     'GET' => [],
     'POST' => [],
-    'PUT' => [],
+    'PATCH' => [],
     'DELETE' => []
 ];
 
@@ -51,10 +53,19 @@ function handleRequest() {
 }
 
 // Aggiungi le tue route qui
-addRoute('GET', '/customers/(\d+)', function($id) {
-    // $id contiene il valore dell'ID
-    echo "Gestisci richiesta GET per il cliente con ID: $id";
+addRoute('GET', '/products/(\d+)', function($id) {
+    $product = Product::Find_by_id($id);
+
+});
+addRoute('GET', '/products', function() {
+    $products = Product::FetchAll();
+});
+addRoute('POST', '/products', function ($_POST){
+    $product = Product::Create($_POST);
+});
+addRoute('POST', '/products', function ($id){
+    $product = Product::Find_by_id($id);
+    $data = file_get_contents("php://input");
 });
 
-// Esegui il gestore della richiesta
 handleRequest();
