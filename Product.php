@@ -49,7 +49,7 @@ class Product
     public static function getLastInsert()
     {
         $pdo = self::connectToDatabase();
-        return $pdo->query("select * from products order by id desc limit 1")->fetch(PDO::FETCH_ASSOC);
+        return $pdo->query("select * from products order by id desc limit 1")->fetchObject("Product");
     }
 
     public static function Find($params)
@@ -73,34 +73,38 @@ class Product
         if (!$stmt->execute()) {
             return false;
         }
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetchObject('Product');
     }
 
     public static function FetchAll()
     {
         $pdo = self::connectToDatabase();
         $sql = "select * from products";
-        $products = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-        $data = [];
-        foreach ($products as $product){
-            $data[] = $product;
-        }
-
-        return $data;
+        return $pdo->query($sql)->fetchAll(PDO::FETCH_CLASS,"Product");
     }
 
     public function edit($params)
     {
         $pdo = self::connectToDatabase();
+        if(!isset($params['marca'])){
+            $params['marca'] = $this->getBrand();
+        }
+        if(!isset($params['nome'])){
+            $params['nome'] = $this->getName();
+        }
+        if(!isset($params['prezzo'])){
+            $params['prezzo'] = $this->getPrice();
+        }
+        $id = $this->getId();
         $stmt = $pdo->prepare("update products set marca=:marca,nome=:nome,prezzo=:prezzo where id=:id");
         $stmt->bindParam(":marca", $params['marca']);
         $stmt->bindParam(":nome", $params['nome']);
         $stmt->bindParam(":prezzo", $params['prezzo']);
-        $stmt->bindParam(":id", $params['id']);
+        $stmt->bindParam(":id", $id);
         if (!$stmt->execute()) {
             return false;
         }
-        return Product::Find_by_id($params['id']);
+        return Product::Find_by_id($id);
     }
 
     public function delete()
