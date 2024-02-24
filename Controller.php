@@ -16,12 +16,12 @@ class Controller
     static public function GetJsonAPI($product)
     {
         return [
-            "Type" => "products",
+            "type" => "products",
             "id" => $product->getId(),
-            "Attributes" => [
-                "Brand" => $product->getBrand(),
-                "Name" => $product->getName(),
-                "Price" => $product->getPrice()
+            "attributes" => [
+                "nome" => $product->getName(),
+                "marca" => $product->getBrand(),
+                "prezzo" => $product->getPrice()
             ]
         ];
     }
