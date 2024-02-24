@@ -66,8 +66,8 @@ addRoute('GET', '/products/(\d+)', function ($path) {
         exit;
     }
     if (!$product = Product::Find_by_id($id)) {
-        http_response_code(500); //server error
-        echo json_encode(["Error" => "Product Not Found"], JSON_PRETTY_PRINT);
+        http_response_code(404); //not found
+        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     $data = ["Data" => Controller::GetJsonAPI($product)];
@@ -113,13 +113,13 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
         exit;
     }
     if (!$product = Product::Find_by_id($id)) {
-        http_response_code(500); //server error
-        echo json_encode(["Error" => "ID Not Existent"], JSON_PRETTY_PRINT);
+        http_response_code(404); //not found
+        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     $data = (array)json_decode(file_get_contents("php://input"));
     if (!$new = $product->edit($data)) {
-        http_response_code(500); //server error
+        http_response_code(404); //not found - edit ritorna un Find o false se non riesce a modificare il record
         json_encode(["Error" => "Params Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
@@ -134,12 +134,12 @@ addRoute('DELETE', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
     if ($id == 404 || !$id) { //controllo sulla validità del path
         http_response_code(404);
-        echo json_encode(["Error" => "ID not acceptable"], JSON_PRETTY_PRINT);
+        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     if (!$product = Product::Find_by_id($id)) {
-        http_response_code(500); //server error
-        echo json_encode(["Error" => "ID Not Existent"], JSON_PRETTY_PRINT);
+        http_response_code(404); //not found
+        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     if (!$product->delete()) {
