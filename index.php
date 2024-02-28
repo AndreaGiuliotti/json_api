@@ -59,12 +59,8 @@ function handleRequest()
 //adding route GET single product
 addRoute('GET', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
-    if ($id == 404 || !$id) { //controllo sulla validità del path
+    if ($id == 404 || !$id || !$product = Product::Find_by_id($id)) { //controllo sulla validità del path
         http_response_code(404);
-        exit;
-    }
-    if (!$product = Product::Find_by_id($id)) {
-        http_response_code(404); //not found
         exit;
     }
     $data = ["data" => Controller::GetJsonAPI($product)];
@@ -100,8 +96,8 @@ addRoute('POST', '/products', function () {
             http_response_code(500); //server error
             exit;
         }
-        http_response_code(201);
         header("Location: /products/" . $product->getId());
+        http_response_code(201);
         $json = Controller::GetJsonAPI($product);
         echo json_encode(["data" => $json], JSON_PRETTY_PRINT);
     } catch (Exception $e) {
@@ -112,12 +108,8 @@ addRoute('POST', '/products', function () {
 //adding route PATCH
 addRoute('PATCH', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
-    if ($id == 404 || !$id) { //controllo sulla validità del path
+    if ($id == 404 || !$id || !$product = Product::Find_by_id($id)) { //controllo sulla validità del path
         http_response_code(404);
-        exit;
-    }
-    if (!$product = Product::Find_by_id($id)) {
-        http_response_code(404); //not found
         exit;
     }
     $data_raw = json_decode(file_get_contents("php://input"), true);
@@ -139,12 +131,8 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
 //adding route DELETE
 addRoute('DELETE', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
-    if ($id == 404 || !$id) { //controllo sulla validità del path
+    if ($id == 404 || !$id || !$product = Product::Find_by_id($id)) { //controllo sulla validità del path
         http_response_code(404);
-        exit;
-    }
-    if ($product = Product::Find_by_id($id)) {
-        http_response_code(404); //not found
         exit;
     }
     if (!$product->delete()) {
