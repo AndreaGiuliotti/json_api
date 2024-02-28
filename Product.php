@@ -26,10 +26,10 @@ class Product
 
     public static function Create($params)
     {
-        $duplicate = self::CheckDuplicates($params);
+        /*$duplicate = self::CheckDuplicates($params);
         if ($duplicate) {
             return false;
-        }
+        }*/
         $pdo = self::connectToDatabase();
         $stmt = $pdo->prepare("insert into products (marca, nome, prezzo) values (:marca, :nome, :prezzo)");
         $stmt->bindParam(":marca", $params['marca']);

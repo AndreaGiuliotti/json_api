@@ -70,7 +70,7 @@ addRoute('GET', '/products/(\d+)', function ($path) {
         echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
-    $data = ["Data" => Controller::GetJsonAPI($product)];
+    $data = ["data" => Controller::GetJsonAPI($product)];
     http_response_code(200); //ok
     echo json_encode($data, JSON_PRETTY_PRINT);
 });
@@ -85,23 +85,38 @@ addRoute('GET', '/products', function () {
     foreach ($products as $product) {
         $raw_json[] = Controller::GetJsonAPI($product);
     }
-    $data = ["Data" => $raw_json];
+    $data = ["data" => $raw_json];
     http_response_code(200); //ok
     echo json_encode($data, JSON_PRETTY_PRINT);
 });
 
 //adding route POST
 addRoute('POST', '/products', function () {
-    $data = (array)json_decode(file_get_contents("php://input"));
-    if (!$product = Product::Create($data)) {
-        http_response_code(500); //server error
-        json_encode(["Error" => "Params Not Acceptable"], JSON_PRETTY_PRINT);
+    if (isset($_POST['data'])) {
+        $data_raw = $_POST;
+    } else {
+        $data_raw = json_decode(file_get_contents("php://input"), true);
+    }
+
+    try {
+        $attributes = $data_raw['data']['attributes'];
+    } catch (Exception $e) {
+        http_response_code(400); //bad request
         exit;
     }
-    http_response_code(201);
-    header("Location: /products/" . $product->getId());
-    $json = Controller::GetJsonAPI($product);
-    echo json_encode(["Data" => $json], JSON_PRETTY_PRINT);
+
+    if (isset($attributes['nome'], $attributes['marca'], $attributes['prezzo'])) {
+        if (!$product = Product::Create($attributes)) {
+            http_response_code(500); //server error
+            exit;
+        }
+        http_response_code(201);
+        header("Location: /products/" . $product->getId());
+        $json = Controller::GetJsonAPI($product);
+        echo json_encode(["data" => $json], JSON_PRETTY_PRINT);
+        exit;
+    }
+    http_response_code(400); //bad request
 });
 
 //adding route PATCH
@@ -109,24 +124,33 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
     if ($id == 404 || !$id) { //controllo sulla validità del path
         http_response_code(404);
-        echo json_encode(["Error" => "ID not acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     if (!$product = Product::Find_by_id($id)) {
         http_response_code(404); //not found
-        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
-    $data = (array)json_decode(file_get_contents("php://input"));
-    if (!$new = $product->edit($data)) {
-        http_response_code(404); //not found - edit ritorna un Find o false se non riesce a modificare il record
-        json_encode(["Error" => "Params Not Acceptable"], JSON_PRETTY_PRINT);
+
+    $data_raw = json_decode(file_get_contents("php://input"), true);
+
+    try {
+        $attributes = $data_raw['data']['attributes'];
+    } catch (Exception $e) {
+        http_response_code(400); //bad request
         exit;
     }
-    http_response_code(200);
-    header("Location: /products/" . $product->getId());
-    $json = Controller::GetJsonAPI($new);
-    echo json_encode(["Data" => $json], JSON_PRETTY_PRINT);
+    if (isset($attributes['nome'], $attributes['marca'], $attributes['prezzo'])) {
+        if (!$new = $product->edit($attributes)) {
+            http_response_code(404); //not found - edit ritorna un Find o false se non riesce a modificare il record
+            exit;
+        }
+        header("Location: /products/" . $product->getId());
+        http_response_code(200);
+        $json = Controller::GetJsonAPI($new);
+        echo json_encode(["data"=>$json]);
+        exit;
+    }
+    http_response_code(400); //bad request
 });
 
 //adding route DELETE
@@ -134,20 +158,17 @@ addRoute('DELETE', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
     if ($id == 404 || !$id) { //controllo sulla validità del path
         http_response_code(404);
-        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     if (!$product = Product::Find_by_id($id)) {
         http_response_code(404); //not found
-        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     if (!$product->delete()) {
         http_response_code(500); //server error
         exit;
     }
-    http_response_code(204);
-    exit;
+    http_response_code(204); //no content
 });
 
 try {
