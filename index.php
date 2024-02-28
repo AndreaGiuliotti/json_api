@@ -100,12 +100,6 @@ addRoute('POST', '/products', function () {
 
     try {
         $attributes = $data_raw['data']['attributes'];
-    } catch (Exception $e) {
-        http_response_code(400); //bad request
-        exit;
-    }
-
-    if (isset($attributes['nome'], $attributes['marca'], $attributes['prezzo'])) {
         if (!$product = Product::Create($attributes)) {
             http_response_code(500); //server error
             exit;
@@ -114,9 +108,9 @@ addRoute('POST', '/products', function () {
         header("Location: /products/" . $product->getId());
         $json = Controller::GetJsonAPI($product);
         echo json_encode(["data" => $json], JSON_PRETTY_PRINT);
-        exit;
+    } catch (Exception $e) {
+        http_response_code(400); //bad request
     }
-    http_response_code(400); //bad request
 });
 
 //adding route PATCH
@@ -135,11 +129,6 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
 
     try {
         $attributes = $data_raw['data']['attributes'];
-    } catch (Exception $e) {
-        http_response_code(400); //bad request
-        exit;
-    }
-    if (isset($attributes['nome'], $attributes['marca'], $attributes['prezzo'])) {
         if (!$new = $product->edit($attributes)) {
             http_response_code(404); //not found - edit ritorna un Find o false se non riesce a modificare il record
             exit;
@@ -148,9 +137,9 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
         http_response_code(200);
         $json = Controller::GetJsonAPI($new);
         echo json_encode(["data"=>$json]);
-        exit;
+    } catch (Exception $e) {
+        http_response_code(400); //bad request
     }
-    http_response_code(400); //bad request
 });
 
 //adding route DELETE
