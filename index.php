@@ -3,7 +3,7 @@ require_once "connection/Database.php";
 require_once "models/Product.php";
 require_once "models/Controller.php";
 
-header("Content-type: application/json; charset=UTF-8");
+header("Content-type: application/vnd.api+json");
 
 // Definisci un array associativo per mappare le route
 $routes = [
