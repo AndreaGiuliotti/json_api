@@ -1,7 +1,7 @@
 <?php
 require_once "connection/Database.php";
-require_once "Product.php";
-require_once "Controller.php";
+require_once "models/Product.php";
+require_once "models/Controller.php";
 
 header("Content-type: application/json; charset=UTF-8");
 
@@ -53,7 +53,6 @@ function handleRequest()
         }
     }
     http_response_code(404);
-    echo json_encode(["Error" => "Route Method Not Set"], JSON_PRETTY_PRINT);
     exit;
 }
 
@@ -62,12 +61,10 @@ addRoute('GET', '/products/(\d+)', function ($path) {
     $id = Controller::CheckPath($path);
     if ($id == 404 || !$id) { //controllo sulla validità del path
         http_response_code(404);
-        echo json_encode(["Error" => "ID not acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     if (!$product = Product::Find_by_id($id)) {
         http_response_code(404); //not found
-        echo json_encode(["Error" => "ID Not Acceptable"], JSON_PRETTY_PRINT);
         exit;
     }
     $data = ["data" => Controller::GetJsonAPI($product)];
@@ -97,7 +94,6 @@ addRoute('POST', '/products', function () {
     } else {
         $data_raw = json_decode(file_get_contents("php://input"), true);
     }
-
     try {
         $attributes = $data_raw['data']['attributes'];
         if (!$product = Product::Create($attributes)) {
@@ -124,9 +120,7 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
         http_response_code(404); //not found
         exit;
     }
-
     $data_raw = json_decode(file_get_contents("php://input"), true);
-
     try {
         $attributes = $data_raw['data']['attributes'];
         if (!$new = $product->edit($attributes)) {
@@ -149,7 +143,7 @@ addRoute('DELETE', '/products/(\d+)', function ($path) {
         http_response_code(404);
         exit;
     }
-    if (!$product = Product::Find_by_id($id)) {
+    if ($product = Product::Find_by_id($id)) {
         http_response_code(404); //not found
         exit;
     }
