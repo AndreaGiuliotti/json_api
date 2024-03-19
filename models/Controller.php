@@ -2,16 +2,10 @@
 
 class Controller
 {
-    static public function CheckPath($path)
+    static public function GetId($path)
     {
         $uri = explode("/", $path);
-        if (!isset($uri) && $uri[1] != "products") {
-            return 404;
-        }
-        if(array_key_exists(2, $uri)){
-            return $uri[2];
-        }
-        return false;
+        return $uri[2];
     }
     static public function GetJsonAPI($product)
     {

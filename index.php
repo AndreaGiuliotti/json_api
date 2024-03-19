@@ -58,8 +58,8 @@ function handleRequest()
 
 //adding route GET single product
 addRoute('GET', '/products/(\d+)', function ($path) {
-    $id = Controller::CheckPath($path);
-    if ($id == 404 || !$id || !$product = Product::Find_by_id($id)) { //controllo sulla validità del path
+    $id = Controller::GetId($path);
+    if (!$product = Product::Find_by_id($id)) { //controllo sulla validità dell'id
         http_response_code(404);
         exit;
     }
@@ -107,8 +107,8 @@ addRoute('POST', '/products', function () {
 
 //adding route PATCH
 addRoute('PATCH', '/products/(\d+)', function ($path) {
-    $id = Controller::CheckPath($path);
-    if ($id == 404 || !$id || !$product = Product::Find_by_id($id)) { //controllo sulla validità del path
+    $id = Controller::GetId($path);
+    if (!$product = Product::Find_by_id($id)) { //controllo sulla validità dell'id
         http_response_code(404);
         exit;
     }
@@ -130,8 +130,8 @@ addRoute('PATCH', '/products/(\d+)', function ($path) {
 
 //adding route DELETE
 addRoute('DELETE', '/products/(\d+)', function ($path) {
-    $id = Controller::CheckPath($path);
-    if ($id == 404 || !$id || !$product = Product::Find_by_id($id)) { //controllo sulla validità del path
+    $id = Controller::GetId($path);
+    if (!$product = Product::Find_by_id($id)) { //controllo sulla validità dell'id
         http_response_code(404);
         exit;
     }
